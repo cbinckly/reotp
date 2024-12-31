@@ -2,7 +2,7 @@
 
 This project is a **One Time Passcode (OTP) Regenerator** that you can use
 to regenerate OTP provisioning URIs and QR codes.  Useful for transitioning
-and existing OTP to an new service or app, like Google Authenticator.
+existing OTPs to a new service or app, like Google Authenticator.
 
 ## Features
 

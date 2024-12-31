@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "reotp"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
   { name="Chris Binckly", email="cbinckly@gmail.com" },
 ]
-description = "Recreate TOTP QR Codes"
+description = "Regenerate OTP URIs and QR Codes"
 readme = "README.md"
 requires-python = ">=3.10"
 packages=["reotp"]

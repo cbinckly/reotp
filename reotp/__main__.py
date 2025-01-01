@@ -18,25 +18,17 @@ import urllib.parse
 from reotp import pbotp
 
 DEFAULT_DIGITS = 6
+ALLOWED_DIGITS = [6, 8]
 DEFAULT_ALGORITHM = 'sha1'
+ALLOWED_ALGORITHMS = ['sha1', 'sha256', 'sha512', 'md5']
 DEFAULT_PERIOD = 30
 
-DIGIT_COUNT_SIX = 1
-DIGIT_COUNT_EIGHT = 2
-
-ALGORITHM_SHA1 = 1;
-ALGORITHM_SHA256 = 2;
-ALGORITHM_SHA512 = 3;
-ALGORITHM_MD5 = 4;
-
-OTP_TYPE_HOTP = 1;
-OTP_TYPE_TOTP = 2;
 
 def parse_args():
     """Parse the command line arguments."""
     parser = argparse.ArgumentParser(description="Regenerate an existing OTP.")
 
-    qr_options = parser.add_argument_group("QR Options")
+    qr_options = parser.add_argument_group("QR options")
     qr_options.add_argument('-i', '--issuer', type=str, required=False,
                         help=("Issuer for TOTP. "
                               "This is the name that will appear in your app.")
@@ -47,7 +39,7 @@ def parse_args():
                             "If not provided library defaults to 'Secret'.")
                         )
 
-    output = parser.add_argument_group("Output Options")
+    output = parser.add_argument_group("qr output")
     output.add_argument('-a', '--qrcode-ascii', action='store_true',
                         help='Display an ascii QR code for the OTP.')
     output.add_argument('-q', '--qrcode-preview', action='store_true',
@@ -60,7 +52,7 @@ def parse_args():
 
     subparsers = parser.add_subparsers(dest='mode')
     secret_parser = subparsers.add_parser(
-            "regenerate", help="Regenerate from secret.")
+            "regenerate", help="Regenerate from a known secret.")
     secret_parser.add_argument('-s', '--secret', type=str, required=False,
                         default="", help=(
                             "Secret for the TOTP. "
@@ -73,9 +65,11 @@ def parse_args():
     advanced.add_argument('-c', '--counter', type=int, default=-1,
                           metavar="CURRENT_COUNT",
                           help='Counter based OTP with current count.')
-    advanced.add_argument('-d', '--digits', type=int, choices=[6, 8],
+    advanced.add_argument('-d', '--digits', type=int,
+                          choices=ALLOWED_DIGITS,
                           default=DEFAULT_DIGITS, help='Number of digits.')
     advanced.add_argument('-a', '--algorithm', type=str,
+                          choices=ALLOWED_ALGORITHMS,
                           default=DEFAULT_ALGORITHM, help='Hashing algorithm.')
     advanced.add_argument('-p', '--period', type=int,
                           default=DEFAULT_PERIOD,
@@ -147,6 +141,8 @@ def migrate(migration_uri):
 
     if otp_params.algorithm == mp.ALGORITHM_SHA256:
         algorithm = hashlib.sha256
+    elif otp_params.algorithm == mp.ALGORITHM_SHA512:
+        algorithm = hashlib.sha512
     elif otp_params.algorithm == mp.ALGORITHM_MD5:
         algorithm = hashlib.md5
 
@@ -184,6 +180,7 @@ def main():
         if not secret:
             secret = get_input()
 
+        # pyotp expects the hashlib digest, make sure it exists.
         algorithm = hashlib.sha1
         if args.algorithm:
             if hasattr(hashlib, args.algorithm):
